@@ -4,10 +4,10 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 
 // BPMN.js 타입 정의
 interface BpmnModeler {
-  importXML(xml: string): Promise<{ warnings: any[] }>;
+  importXML(xml: string): Promise<{ warnings?: any[] }>;
   saveXML(options: { format: boolean }): Promise<{ xml?: string }>;
-  saveSVG(): Promise<{ svg: string }>;
-  createDiagram(): Promise<void>;
+  saveSVG(): Promise<{ svg?: string }>;
+  createDiagram(): Promise<{ warnings?: any[] }>;
   destroy(): void;
   get(name: string): any;
   on(event: string, callback: (e: any) => void): void;
