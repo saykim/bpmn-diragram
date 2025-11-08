@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 // BPMN.js 타입 정의
 interface BpmnModeler {
   importXML(xml: string): Promise<{ warnings: any[] }>;
-  saveXML(options: { format: boolean }): Promise<{ xml: string }>;
+  saveXML(options: { format: boolean }): Promise<{ xml?: string }>;
   saveSVG(): Promise<{ svg: string }>;
   createDiagram(): Promise<void>;
   destroy(): void;
@@ -59,7 +59,9 @@ export function BpmnEditor({
         eventBus.on('commandStack.changed', async () => {
           try {
             const { xml } = await modeler.saveXML({ format: true });
-            onXmlChange?.(xml);
+            if (xml) {
+              onXmlChange?.(xml);
+            }
           } catch (err) {
             console.error('Failed to save XML:', err);
           }
@@ -106,7 +108,9 @@ export function BpmnEditor({
 
     try {
       const { xml } = await modelerRef.current.saveXML({ format: true });
-      onSave?.(xml);
+      if (xml) {
+        onSave?.(xml);
+      }
     } catch (err) {
       console.error('Failed to save diagram:', err);
       setError('다이어그램 저장에 실패했습니다.');
