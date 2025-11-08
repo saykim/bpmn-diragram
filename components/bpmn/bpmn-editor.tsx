@@ -33,7 +33,7 @@ const defaultDiagram = `<?xml version="1.0" encoding="UTF-8"?>
 </bpmn:definitions>`;
 
 export function BpmnEditor({
-  initialXml = defaultDiagram,
+  initialXml,
   onXmlChange,
   onSave,
   diagramId,
@@ -46,19 +46,19 @@ export function BpmnEditor({
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // BPMN Modeler 초기화
+    // BPMN Modeler 초기화 (keyboard 설정 제거 - 최신 버전에서 암묵적 처리)
     const modeler = new BpmnModeler({
       container: containerRef.current,
-      keyboard: {
-        bindTo: document,
-      },
     });
 
     modelerRef.current = modeler;
 
+    // 빈 XML 또는 유효하지 않은 XML 처리
+    const xmlToLoad = initialXml && initialXml.trim() !== "" ? initialXml : defaultDiagram;
+
     // 다이어그램 로드
     modeler
-      .importXML(initialXml)
+      .importXML(xmlToLoad)
       .then(() => {
         const canvas = modeler.get("canvas") as any;
         canvas.zoom("fit-viewport");
@@ -106,7 +106,7 @@ export function BpmnEditor({
 
   // XML이 외부에서 변경되었을 때
   useEffect(() => {
-    if (modelerRef.current && initialXml) {
+    if (modelerRef.current && initialXml && initialXml.trim() !== "") {
       modelerRef.current.importXML(initialXml).catch((err) => {
         console.error("XML 업데이트 실패:", err);
       });
