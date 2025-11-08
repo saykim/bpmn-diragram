@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { BpmnEditor } from '@/components/bpmn/bpmn-editor';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -9,6 +9,20 @@ import { TagInput } from '@/components/tags/tag-input';
 import { getAllTags } from '@/lib/storage';
 
 export default function EditorPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+          <p className="text-gray-600 dark:text-gray-300">에디터 로딩 중...</p>
+        </div>
+      }
+    >
+      <EditorPageContent />
+    </Suspense>
+  );
+}
+
+function EditorPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const diagramId = searchParams.get('id');

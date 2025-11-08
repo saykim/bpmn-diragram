@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import type EventBus from 'diagram-js/lib/core/EventBus';
 
 // BPMN.js 타입 정의
 interface BpmnModeler {
@@ -54,7 +55,7 @@ export function BpmnEditor({
         }
 
         // 다이어그램 변경 이벤트 리스너
-        const eventBus = modeler.get('eventBus') as any;
+        const eventBus = modeler.get<EventBus>('eventBus');
 
         eventBus.on('commandStack.changed', async () => {
           try {
