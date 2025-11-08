@@ -54,7 +54,7 @@ export function BpmnEditor({
         }
 
         // 다이어그램 변경 이벤트 리스너
-        const eventBus = modeler.get('eventBus');
+        const eventBus = modeler.get('eventBus') as any;
 
         eventBus.on('commandStack.changed', async () => {
           try {
