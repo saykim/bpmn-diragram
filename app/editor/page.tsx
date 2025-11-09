@@ -4,8 +4,16 @@ import { useState, useEffect } from "react";
 import { BpmnEditor } from "@/components/bpmn/bpmn-editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { getProcessEngine } from "@/lib/engine/process-engine";
+import { FOOD_PROCESS_TEMPLATES } from "@/lib/templates/food-process-templates";
 
 export default function EditorPage() {
   const router = useRouter();
@@ -110,6 +118,27 @@ export default function EditorPage() {
     }
   };
 
+  const handleLoadTemplate = (templateId: string) => {
+    if (!confirm("템플릿을 불러오겠습니까? 저장하지 않은 변경사항이 사라집니다.")) {
+      return;
+    }
+
+    const template = FOOD_PROCESS_TEMPLATES.find((t) => t.id === templateId);
+    if (!template) {
+      alert("템플릿을 찾을 수 없습니다.");
+      return;
+    }
+
+    setXml(template.bpmnXml);
+    setProcessName(template.name);
+    setProcessKey(template.id + "-" + Date.now());
+    setIsDeployed(false);
+
+    localStorage.setItem("bpmn-current-diagram", template.bpmnXml);
+    localStorage.setItem("bpmn-current-name", template.name);
+    localStorage.setItem("bpmn-current-key", template.id + "-" + Date.now());
+  };
+
   return (
     <div className="flex flex-col h-screen">
       {/* 헤더 */}
@@ -125,6 +154,18 @@ export default function EditorPage() {
             <h1 className="text-xl font-semibold">BPMN 프로세스 편집기</h1>
           </div>
           <div className="flex items-center gap-2">
+            <Select onValueChange={handleLoadTemplate}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="템플릿 불러오기" />
+              </SelectTrigger>
+              <SelectContent>
+                {FOOD_PROCESS_TEMPLATES.map((template) => (
+                  <SelectItem key={template.id} value={template.id}>
+                    {template.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button variant="outline" onClick={handleNewProcess}>
               새 프로세스
             </Button>
