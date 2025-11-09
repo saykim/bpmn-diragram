@@ -69,6 +69,13 @@ export class LOTTrackingService {
   }
 
   /**
+   * 모든 LOT 조회
+   */
+  getAllLOTs(): LOT[] {
+    return Array.from(this.lots.values());
+  }
+
+  /**
    * 프로세스 인스턴스의 모든 LOT 조회
    */
   getLOTsByProcess(processInstanceId: string): LOT[] {

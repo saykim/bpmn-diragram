@@ -125,6 +125,9 @@ export default function DashboardPage() {
               <Button onClick={() => router.push("/haccp")} variant="outline">
                 HACCP
               </Button>
+              <Button onClick={() => router.push("/lot-tracking")} variant="outline">
+                LOT 추적
+              </Button>
               <Button onClick={() => router.push("/tasklist")} variant="outline">
                 태스크 목록
               </Button>
