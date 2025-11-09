@@ -5,7 +5,16 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { getProcessEngine } from "@/lib/engine/process-engine";
 import { ProcessDefinition, ProcessInstance } from "@/types";
 
@@ -18,6 +27,12 @@ export default function DashboardPage() {
     processInstances: { total: 0, active: 0, completed: 0, suspended: 0, terminated: 0, failed: 0 },
     tasks: { total: 0, pending: 0, assigned: 0, inProgress: 0, completed: 0, cancelled: 0 },
   });
+
+  // 프로세스 시작 다이얼로그 상태
+  const [startDialogOpen, setStartDialogOpen] = useState(false);
+  const [selectedProcessDef, setSelectedProcessDef] = useState<ProcessDefinition | null>(null);
+  const [businessKey, setBusinessKey] = useState("");
+  const [isStarting, setIsStarting] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -32,6 +47,50 @@ export default function DashboardPage() {
     setProcessDefinitions(defs);
     setProcessInstances(instances.slice(0, 10)); // 최근 10개만
     setStatistics(stats);
+  };
+
+  const handleOpenStartDialog = (processDef: ProcessDefinition) => {
+    setSelectedProcessDef(processDef);
+    setBusinessKey("LOT-" + Date.now()); // 기본 비즈니스 키
+    setStartDialogOpen(true);
+  };
+
+  const handleStartProcess = async () => {
+    if (!selectedProcessDef) return;
+
+    setIsStarting(true);
+    try {
+      const engine = getProcessEngine();
+
+      // 프로세스 인스턴스 시작
+      const instance = await engine.startProcess(
+        selectedProcessDef.key,
+        businessKey,
+        {},
+        "system"
+      );
+
+      // 다이얼로그 닫기 및 상태 초기화
+      setStartDialogOpen(false);
+      setSelectedProcessDef(null);
+      setBusinessKey("");
+
+      // 데이터 새로고침
+      loadData();
+
+      alert(`프로세스가 시작되었습니다!\n인스턴스 ID: ${instance.id}`);
+    } catch (error) {
+      console.error("프로세스 시작 실패:", error);
+      alert("프로세스 시작에 실패했습니다.");
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
+  const handleCancelStart = () => {
+    setStartDialogOpen(false);
+    setSelectedProcessDef(null);
+    setBusinessKey("");
   };
 
   const getStatusBadge = (status: string) => {
@@ -165,7 +224,12 @@ export default function DashboardPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button size="sm" variant="outline">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleOpenStartDialog(def)}
+                          disabled={def.suspended}
+                        >
                           시작
                         </Button>
                       </TableCell>
@@ -240,6 +304,49 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </main>
+
+      {/* 프로세스 시작 다이얼로그 */}
+      <Dialog open={startDialogOpen} onOpenChange={setStartDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>프로세스 시작</DialogTitle>
+            <DialogDescription>
+              {selectedProcessDef?.name} 프로세스의 새 인스턴스를 시작합니다.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">프로세스 키</label>
+              <Input
+                type="text"
+                value={selectedProcessDef?.key || ""}
+                disabled
+                className="bg-gray-50"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Business Key</label>
+              <Input
+                type="text"
+                value={businessKey}
+                onChange={(e) => setBusinessKey(e.target.value)}
+                placeholder="예: LOT-20241109-001"
+              />
+              <p className="text-xs text-gray-500">
+                프로세스 인스턴스를 식별하는 고유 키입니다. (예: LOT 번호, 주문 번호 등)
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCancelStart} disabled={isStarting}>
+              취소
+            </Button>
+            <Button onClick={handleStartProcess} disabled={isStarting}>
+              {isStarting ? "시작 중..." : "프로세스 시작"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
