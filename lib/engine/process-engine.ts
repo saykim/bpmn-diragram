@@ -6,16 +6,22 @@
 import { ProcessDefinition } from "@/types";
 import { ProcessInstanceService } from "./process-instance-service";
 import { TaskService } from "./task-service";
+import { HACCPService } from "./haccp-service";
+import { LOTTrackingService } from "./lot-tracking-service";
 import { v4 as uuidv4 } from "uuid";
 
 export class ProcessEngine {
   private processDefinitions: Map<string, ProcessDefinition> = new Map();
   private processInstanceService: ProcessInstanceService;
   private taskService: TaskService;
+  private haccpService: HACCPService;
+  private lotTrackingService: LOTTrackingService;
 
   constructor() {
     this.processInstanceService = new ProcessInstanceService();
     this.taskService = new TaskService();
+    this.haccpService = new HACCPService();
+    this.lotTrackingService = new LOTTrackingService();
   }
 
   // ==================== 프로세스 정의 관리 ====================
@@ -84,6 +90,18 @@ export class ProcessEngine {
     return this.taskService;
   }
 
+  // ==================== HACCP 서비스 ====================
+
+  getHACCPService() {
+    return this.haccpService;
+  }
+
+  // ==================== LOT 추적 서비스 ====================
+
+  getLOTTrackingService() {
+    return this.lotTrackingService;
+  }
+
   // ==================== 편의 메서드 ====================
 
   /**
@@ -139,6 +157,8 @@ export class ProcessEngine {
     this.processDefinitions.clear();
     this.processInstanceService.clear();
     this.taskService.clear();
+    this.haccpService.clear();
+    this.lotTrackingService.clear();
   }
 }
 

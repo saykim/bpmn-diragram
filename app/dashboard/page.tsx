@@ -122,6 +122,9 @@ export default function DashboardPage() {
               <Button onClick={() => router.push("/operate")} variant="outline">
                 모니터링
               </Button>
+              <Button onClick={() => router.push("/haccp")} variant="outline">
+                HACCP
+              </Button>
               <Button onClick={() => router.push("/tasklist")} variant="outline">
                 태스크 목록
               </Button>
